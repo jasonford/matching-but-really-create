@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { itemFeedbackSwal } from '../../helpers/swallows.js'
 import translateScopeId from '../../helpers/translateScopeId.js'
 
@@ -49,21 +49,20 @@ const props = defineProps({
 const lang = store.getters.language()
 const item = await translateScopeId(props.id, lang)
 
+const response = reactive(await Agent.state(`multiple-choice/${props.id}`))
+if (!response.selection) response.selection = []
 
-// v-checkbox models either a value (in my case, the selected index) or an array of values depending on "multiple" attribute.
-let userSelect = ref(item.selectMultiple ? [] : false)
+const userSelect = computed({
+  get() { return item.selectMultiple ? response.selection : response.selection[0] },
+  set(value) { response.selection = item.selectMultiple ? value : [value] }
+})
 
 function isCorrect() {
-    if (item.selectMultiple) {
-        const neededIndices = []
-        item.choices.forEach((c,i) => c.isCorrect && neededIndices.push(i))
-        const all = neededIndices.every(i => userSelect.value.includes(i))
-        const only = userSelect.value.every(i => neededIndices.includes(i))
-        return all && only
-    } else {
-        const correctIndex = item.choices.findIndex(c => c.isCorrect)
-        return userSelect.value === correctIndex
-    }
+    const neededIndices = []
+    item.choices.forEach((c,i) => c.isCorrect && neededIndices.push(i))
+    const all = neededIndices.every(i => response.selection.includes(i))
+    const only = response.selection.every(i => neededIndices.includes(i))
+    return all && only
 }
 
 async function handleSubmit() {

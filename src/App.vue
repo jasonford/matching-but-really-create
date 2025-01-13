@@ -109,7 +109,7 @@
 
   const userImagePath = reactive(null)
   const data = reactive({
-    content: null,
+    content: [],
     active: null,
     tags: null,
     userAvatarPath: null

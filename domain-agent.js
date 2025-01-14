@@ -27,9 +27,10 @@
         if (context) active.context = context
         if (authority) active.authority = authority
 
-        const name = `xapi/${Agent.uuid()}`
-        await Agent.create({ name, active })
-        Agent.log('Created xapi thing', active)
+        Object.assign(
+          await xApiAgent.state(`xapi/${Agent.uuid()}`),
+          active
+        )
       }
     })
   })

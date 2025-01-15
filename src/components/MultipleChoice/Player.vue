@@ -66,12 +66,23 @@ function isCorrect() {
 }
 
 async function handleSubmit() {
-    const correct = isCorrect()
+    const success = isCorrect()
     if (Agent.embedded) Agent.close({
-        success: correct,
-        message: getMessage(correct)
+        success,
+        message: getMessage(success)
     })
-    else await itemFeedbackSwal(t, correct, getMessage(correct))
+    else await itemFeedbackSwal(t, success, getMessage(success))
+
+    response.xapi = {
+        verb: 'http://adlnet.gov/expapi/verbs/answered',
+        object: props.id,
+        result: {
+            success,
+            completion: true
+        },
+//        context,
+//        authority
+    }
 }
 
 function getMessage(isCorrect) {
